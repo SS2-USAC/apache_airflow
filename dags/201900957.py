@@ -1,46 +1,41 @@
 from datetime import datetime, timedelta
-from airflow.decorators import dag, task
-
+from airflow.sdk import dag, task
 
 default_args = {
-    "owner": "201900957",
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
+    'owner': '201900957',
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
-# Definición del DAG mediante el decorador @dag
 @dag(
-    dag_id="dag_sencillo_ejemplo",
+    dag_id='mi_primer_dag_sencillo',
     default_args=default_args,
-    description="Un DAG básico de prueba en Airflow",
-    schedule_interval="@daily", 
+    description='Un DAG básico de ejemplo usando TaskFlow API',
+    schedule='@daily',  # En Airflow 2.4+ y Airflow 3 se usa 'schedule'
     start_date=datetime(2026, 1, 1),
-    catchup=False,  
-    tags=["ejemplo", "principiante"],
+    catchup=False,
+    tags=['ejemplo', 'inicio'],
 )
 def mi_primer_dag():
 
-    
     @task()
     def extraer_datos():
-        print("Obteniendo información...")
-        return {"datos": [10, 20, 30]}
+        datos = [10, 20, 30]
+        print(f"Datos extraídos: {datos}")
+        return datos
 
-    
     @task()
-    def procesar_datos(payload: dict):
-        numeros = payload["datos"]
-        resultado = sum(numeros)
-        print(f"La suma de los datos es: {resultado}")
-        return resultado
+    def procesar_datos(datos: list):
+        total = sum(datos)
+        print(f"El total procesado es: {total}")
+        return total
 
-    
     @task()
-    def guardar_resultado(total: int):
-        print(f"Resultado final {total} guardado exitosamente en la base de datos.")
+    def enviar_notificacion(resultado: int):
+        print(f"¡Proceso completado con éxito! Resultado final: {resultado}")
 
     datos = extraer_datos()
     resultado = procesar_datos(datos)
-    guardar_resultado(resultado)
+    enviar_notificacion(resultado)
 
-dag = mi_primer_dag()
+mi_dag = mi_primer_dag()
